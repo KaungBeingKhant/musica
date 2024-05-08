@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Music Player - Apple Music Theme</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"> <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap"> <!-- Google Fonts -->
+    <style>
+        /* CSS styles for the webpage */
+        body {
+            font-family: "Montserrat", sans-serif;
+            background-color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+            min-height: 100vh;
+            margin: 0;
+            transition: background 0.2s linear;
+        }
+
+        body.dark {
+            background-color: #292c35;
+            color: #fff;
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            margin-right: 10px;
+            width: calc(100% - 60px);
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #333;
+            padding-left: 40px;
+            background-image: url('https://img.icons8.com/pastel-glyph/64/000000/search--v1.png');
+            background-size: 20px;
+            background-repeat: no-repeat;
+            background-position: 10px center;
+            transition: background-color 0.3s;
+        }
+
+        input[type="text"]::placeholder {
+            color: rgba(0, 0, 0, 0.5);
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            background-color: rgba(255, 255, 255, 1);
+        }
+
+        #video-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .video-card {
+            position: relative;
+            width: 300px;
+            margin: 20px;
+            padding: 15px;
+            background-color: #f4f4f6;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .video-title {
+            margin-top: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        iframe {
+            width: 100%;
+            height: 200px;
+            border: none;
+        }
+
+        /* Checkbox styles */
+        .checkbox-container {
+            position: absolute;
+            top: 20px; /* Adjust this value to move the checkbox vertically */
+            left: 20px; /* Adjust this value to move the checkbox horizontally */
+        }
+
+        .checkbox {
+            opacity: 0;
+            position: absolute;
+        }
+
+        .checkbox-label {
+            background-color: #111;
+            width: 47px;
+            height: 26px;
+            border-radius: 50px;
+            position: relative;
+            padding: 5px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .fa-moon {
+            color: #f1c40f;
+        }
+
+        .fa-sun {
+            color: #f39c12;
+        }
+
+        .checkbox-label .ball {
+            background-color: #fff;
+            width: 22px;
+            height: 22px;
+            position: absolute;
+            left: 6px;
+            top: 5px;
+            border-radius: 50%;
+            transition: transform 0.2s linear;
+        }
+
+        .checkbox:checked + .checkbox-label .ball {
+            transform: translateX(24px);
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <h1>MUSICA</h1> <!-- Title of the website -->
+        <!-- Search container -->
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Search for music..." onkeydown="handleKeyDown(event)">
+        </div>
+    </header>
+
+    <!-- Container for displaying videos -->
+    <div id="video-container"></div>
+
+    <!-- Checkbox -->
+    <div class="checkbox-container">
+        <input type="checkbox" class="checkbox" id="checkbox">
+        <label for="checkbox" class="checkbox-label">
+            <i class="fas fa-moon"></i>
+            <i class="fas fa-sun"></i>
+            <span class="ball"></span>
+        </label>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script> <!-- Font Awesome -->
+    <script>
+        var player;
+        var nextPageToken = ''; // To store the token for the next page of results
+        var isLoading = false; // To track if data is being loaded
+
+        // Function to fetch YouTube videos based on search query
+        function searchYouTube() {
+            var searchQuery = document.getElementById('search-input').value.trim(); // Get the search query from the input field
+
+            if (searchQuery !== '') {
+                if (!isLoading) { // If data is not being loaded
+                    isLoading = true; // Set loading flag to true
+
+                    // YouTube API key
+                    var apiKey = 'AIzaSyC9ppK_4kYIOxsTfbYs1tfjnwpLXiM1IYc'; // Replace with your YouTube API key
+
+                    // Construct the URL for fetching data
+                    var url = 'https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=10&q=' + encodeURIComponent(searchQuery) + '&type=video&key=' + apiKey;
+
+                    // If there is a nextPageToken, add it to the URL
+                    if (nextPageToken !== '') {
+                        url += '&pageToken=' + nextPageToken;
+                    }
+
+                    // Fetch data from YouTube API
+                    fetch(url)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Update nextPageToken with the token for the next page of results
+                        nextPageToken = data.nextPageToken || '';
+
+                        data.items.forEach(item => { // Loop through fetched videos
+                            var videoCard = document.createElement('div'); // Create a div for each video
+                            videoCard.className = 'video-card'; // Add class for styling
+
+                            var iframe = document.createElement('iframe'); // Create an iframe to embed the video
+                            iframe.src = 'https://www.youtube.com/embed/' + item.id.videoId + '?enablejsapi=1'; // Set source of iframe
+                            iframe.allowFullscreen = true; // Allow fullscreen mode
+
+                            var title = document.createElement('div'); // Create a title for the video
+                            title.className = 'video-title'; // Add class for styling
+                            title.textContent = item.snippet.title; // Set video title
+
+                            videoCard.appendChild(iframe); // Append iframe to video card
+                            videoCard.appendChild(title); // Append title to video card
+
+                            document.getElementById('video-container').appendChild(videoCard); // Append video card to container
+
+                            initializePlayer(item.id.videoId); // Initialize the YouTube player for each iframe
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error fetching YouTube videos:', error);
+                        alert('An error occurred while fetching YouTube videos. Please try again later.');
+                    })
+                    .finally(() => {
+                        // After data is loaded, set loading flag to false
+                        isLoading = false;
+                    });
+                }
+            } else {
+                alert('Please enter a search query.'); // Alert if search query is empty
+            }
+        }
+
+        // Function to initialize the YouTube player
+        function initializePlayer(videoId) {
+            player = new YT.Player('player-' + videoId, {
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+
+        // Function to start playing the video when ready
+        function onPlayerReady(event) {
+            event.target.playVideo();
+        }
+
+        // Function to loop the video when it ends
+        function onPlayerStateChange(event) {
+            if (event.data === YT.PlayerState.ENDED) {
+                event.target.playVideo();
+            }
+        }
+
+        // Function to handle key down event
+        function handleKeyDown(event) {
+            if (event.key === "Enter") {
+                searchYouTube(); // Call search function when Enter key is pressed
+            }
+        }
+
+        // Function to detect when user scrolls to the bottom of the page
+        window.onscroll = function() {
+            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+                // If user scrolled to bottom, load more videos
+                searchYouTube();
+            }
+        };
+
+        // Toggle dark mode when checkbox is clicked
+        const checkbox = document.getElementById("checkbox");
+        checkbox.addEventListener("change", () => {
+            document.body.classList.toggle("dark");
+        });
+    </script>
+    <script src="https://www.youtube.com/iframe_api"></script> <!-- Include YouTube Iframe API -->
+</body>
+</html>
