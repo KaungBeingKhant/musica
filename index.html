@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Musica</title>
+    <title>YouTube Music Player - Apple Music Theme</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"> <!-- Font Awesome -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap"> <!-- Google Fonts -->
     <style>
@@ -40,7 +40,7 @@
             border: none;
             border-radius: 5px;
             margin-right: 10px;
-            width: calc(100% - 60px);
+            width: calc(100% - 160px); /* Adjusted width for the search button */
             background-color: rgba(255, 255, 255, 0.9);
             color: #333;
             padding-left: 40px;
@@ -87,6 +87,22 @@
             width: 100%;
             height: 200px;
             border: none;
+        }
+
+        /* Button styles */
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
         }
 
         /* Checkbox styles */
@@ -146,6 +162,7 @@
         <!-- Search container -->
         <div class="search-container">
             <input type="text" id="search-input" placeholder="Search for music..." onkeydown="handleKeyDown(event)">
+            <button onclick="searchYouTube()">Search</button> <!-- Search button -->
         </div>
     </header>
 
@@ -167,6 +184,72 @@
     <script>
         var nextPageToken = ''; // To store the token for the next page of results
         var isLoading = false; // To track if data is being loaded
+
+        // Function to fetch YouTube videos based on search query
+        function searchYouTube() {
+            var searchQuery = document.getElementById('search-input').value.trim(); // Get the search query from the input field
+
+            if (searchQuery !== '') {
+                if (!isLoading) { // If data is not being loaded
+                    isLoading = true; // Set loading flag to true
+
+                    // YouTube API key
+                    var apiKey = 'YOUR_YOUTUBE_API_KEY'; // Replace with your YouTube API key
+
+                    // Construct the URL for fetching data
+                    var url = 'https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=10&q=' + encodeURIComponent(searchQuery) + '&type=video&key=' + apiKey;
+
+                    // If there is a nextPageToken, add it to the URL
+                    if (nextPageToken !== '') {
+                        url += '&pageToken=' + nextPageToken;
+                    }
+
+                    // Fetch data from YouTube API
+                    fetch(url)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Update nextPageToken with the token for the next page of results
+                        nextPageToken = data.nextPageToken || '';
+
+                        // Clear previous search results
+                        document.getElementById('video-container').innerHTML = '';
+
+                        data.items.forEach(item => { // Loop through fetched videos
+                            var videoCard = document.createElement('div'); // Create a div for each video
+                            videoCard.className = 'video-card'; // Add class for styling
+
+                            var iframe = document.createElement('iframe'); // Create an iframe to embed the video
+                            iframe.src = 'https://www.youtube.com/embed/' + item.id.videoId + '?enablejsapi=1'; // Set source of iframe
+                            iframe.allowFullscreen = true; // Allow fullscreen mode
+
+                            var title = document.createElement('div'); // Create a title for the video
+                            title.className = 'video-title'; // Add class for styling
+                            title.textContent = item.snippet.title; // Set video title
+
+                            videoCard.appendChild(iframe); // Append iframe to video card
+                            videoCard.appendChild(title); // Append title to video card
+
+                            document.getElementById('video-container').appendChild(videoCard); // Append video card to container
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error fetching YouTube videos:', error);
+                        alert('An error occurred while fetching YouTube videos. Please try again later.');
+                    })
+                    .finally(() => {
+                        // After data is loaded, set loading flag to false
+                        isLoading = false;
+                    });
+                }
+            } else {
+                alert('Please enter a search query.'); // Alert if search query is empty
+            }
+        }
 
         // Function to fetch more YouTube videos based on nextPageToken
         function fetchMoreVideos() {
@@ -238,7 +321,7 @@
         function handleKeyDown(event) {
             if (event.key === "Enter") {
                 event.preventDefault(); // Prevent default form submission behavior
-                fetchMoreVideos(); // Load more videos when Enter key is pressed
+                searchYouTube(); // Load videos when Enter key is pressed
             }
         }
     </script>
