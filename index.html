@@ -138,6 +138,7 @@
         }
 
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script> <!-- Font Awesome -->
 </head>
 <body>
     <!-- Header -->
@@ -163,7 +164,6 @@
     </div>
 
     <!-- JavaScript -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script> <!-- Font Awesome -->
     <script>
         var player;
         var nextPageToken = ''; // To store the token for the next page of results
@@ -178,7 +178,7 @@
                     isLoading = true; // Set loading flag to true
 
                     // YouTube API key
-                    var apiKey = 'AIzaSyC9ppK_4kYIOxsTfbYs1tfjnwpLXiM1IYc'; // Replace with your YouTube API key
+                    var apiKey = 'YOUR_YOUTUBE_API_KEY'; // Replace with your YouTube API key
 
                     // Construct the URL for fetching data
                     var url = 'https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=10&q=' + encodeURIComponent(searchQuery) + '&type=video&key=' + apiKey;
