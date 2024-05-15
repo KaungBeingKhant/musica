@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Music Player - Apple Music Theme</title>
+    <title>MUSICA</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"> <!-- Font Awesome -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap"> <!-- Google Fonts -->
     <style>
@@ -61,32 +61,47 @@
         }
 
         #video-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
             padding: 20px;
+            width: 100%;
+            max-width: 1200px;
         }
 
         .video-card {
             position: relative;
-            width: 300px;
-            margin: 20px;
             padding: 15px;
             background-color: #f4f4f6;
             border-radius: 10px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.2s;
+        }
+
+        .video-card:hover {
+            transform: scale(1.05);
+        }
+
+        body.dark .video-card {
+            background-color: #444;
+            color: #fff;
         }
 
         .video-title {
             margin-top: 10px;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
+            text-align: center;
         }
 
         iframe {
             width: 100%;
-            height: 200px;
+            height: 150px;
             border: none;
+            border-radius: 10px;
         }
 
         /* Button styles */
@@ -144,7 +159,7 @@
             height: 22px;
             position: absolute;
             left: 6px;
-            top: 5px;
+            top: 3px;
             border-radius: 50%;
             transition: transform 0.2s linear;
         }
@@ -152,7 +167,6 @@
         .checkbox:checked + .checkbox-label .ball {
             transform: translateX(24px);
         }
-
     </style>
 </head>
 <body>
